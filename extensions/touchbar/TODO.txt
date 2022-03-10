@@ -1,0 +1,25 @@
+-- before considering for core:
+
+    investigate virtual toolbar __gc again
+        can we assign non-lua connected callback to defer window close until stream well and truly dead?
+
+    add :delete() method to bar and virtual objects
+
+    move push/to helpers to new model which guarantees same userdata but still uses selfRef count to self delete when collected
+
+    "dismissing" modal bar doesn't clear items when Hammerspoon frontmost, though allowing garbage collection on the bar object does... need way to remove bar even when Hammerspoon frontmost that doesn't require garbage collection (or delete) in case they want to reattach it later...
+
+-- eventually
+
+    more element types?
+
+    can we force creation of 16" version in virtual touchbar? would be nice to be able to choose for development purposes
+        note that I expect doing this on a touchbar equipped mac would bork the physical one (temporarily) since the dimensions differ
+        which begs the question -- even though original module broke 16" laptop touchbars, would the virtual one have
+            worked on them at the normal size? Have to figure out how to safely craft a test for this...
+            maybe:
+                td = require("hs._asm.undocumented.touchbar.debug")
+                td.dfrStatus(2)
+                tb = dofile(".../Examples/touchbar.lua")
+                tb.toggle()
+
