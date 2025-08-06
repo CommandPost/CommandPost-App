@@ -8,6 +8,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvariadic-macros"
 #define SENTRY_NO_UIKIT 1
+#define SDK_V9 0
+#define SDK_v9 0
 #import "Sentry.h"
 #pragma clang diagnostic pop
 
