@@ -2139,7 +2139,7 @@
 		942E71A919B11176001BA156 /* MJAccessibilityUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MJAccessibilityUtils.m; sourceTree = "<group>"; };
 		943BF0F019A4B43E0017F79D /* MJUserNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MJUserNotificationManager.h; sourceTree = "<group>"; };
 		943BF0F119A4B43E0017F79D /* MJUserNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MJUserNotificationManager.m; sourceTree = "<group>"; };
-		9445CA0B19083251002568BB /* CommandPost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommandPost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9445CA0B19083251002568BB /* CommandPost Engine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CommandPost Engine.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		944A2D341989735300D8DC90 /* MJAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MJAppDelegate.m; sourceTree = "<group>"; };
 		944A2D351989735300D8DC90 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
 		944A2D3D1989737E00D8DC90 /* Credits.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = Credits.rtf; sourceTree = "<group>"; };
@@ -4245,7 +4245,7 @@
 		9445CA0C19083251002568BB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9445CA0B19083251002568BB /* CommandPost.app */,
+				9445CA0B19083251002568BB /* CommandPost Engine.app */,
 				D02F95241A00221C00E28BB2 /* Hammerspoon Tests.xctest */,
 				4FBE2CF91B7261A200407788 /* libapplication.dylib */,
 				4FBE2D101B72631600407788 /* libapplicationwatcher.dylib */,
@@ -6744,7 +6744,7 @@
 			);
 			name = Hammerspoon;
 			productName = Hammerspoon;
-			productReference = 9445CA0B19083251002568BB /* CommandPost.app */;
+			productReference = 9445CA0B19083251002568BB /* CommandPost Engine.app */;
 			productType = "com.apple.product-type.application";
 		};
 		B8524F28201A88CD00844F3D /* hid */ = {
@@ -9535,7 +9535,7 @@
 				);
 				MARKETING_VERSION = 1.2.17;
 				PRODUCT_BUNDLE_IDENTIFIER = org.latenitefilms.CommandPost;
-				PRODUCT_NAME = CommandPost;
+				PRODUCT_NAME = "CommandPost Engine";
 			};
 			name = Profile;
 		};
@@ -11321,7 +11321,7 @@
 				);
 				MARKETING_VERSION = 1.2.17;
 				PRODUCT_BUNDLE_IDENTIFIER = org.latenitefilms.CommandPost;
-				PRODUCT_NAME = CommandPost;
+				PRODUCT_NAME = "CommandPost Engine";
 			};
 			name = Debug;
 		};
@@ -11337,7 +11337,7 @@
 				);
 				MARKETING_VERSION = 1.2.17;
 				PRODUCT_BUNDLE_IDENTIFIER = org.latenitefilms.CommandPost;
-				PRODUCT_NAME = CommandPost;
+				PRODUCT_NAME = "CommandPost Engine";
 			};
 			name = Release;
 		};
