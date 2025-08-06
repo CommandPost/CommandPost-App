@@ -9051,7 +9051,7 @@
 				);
 				INFOPLIST_FILE = "CommandPost Workflow Extension/Extras/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CommandPost;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 LateNite Films. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © LateNite Films Pty Ltd 2016-2025. All Rights Reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -9148,7 +9148,7 @@
 				);
 				INFOPLIST_FILE = "CommandPost Workflow Extension/Extras/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CommandPost;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 LateNite Films. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © LateNite Films Pty Ltd 2016-2025. All Rights Reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -9243,7 +9243,7 @@
 				);
 				INFOPLIST_FILE = "CommandPost Workflow Extension/Extras/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CommandPost;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 LateNite Films. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © LateNite Films Pty Ltd 2016-2025. All Rights Reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
