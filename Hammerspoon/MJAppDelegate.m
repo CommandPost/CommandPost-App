@@ -13,6 +13,56 @@
 #import "variables.h"
 #import "secrets.h"
 
+#import <AppKit/AppKit.h>
+#import <Security/Security.h>
+#import <ApplicationServices/ApplicationServices.h>
+
+static BOOL isCommandPostCodeSigned(NSURL *url, NSString *teamID, NSString *bundleID)
+{
+
+    SecStaticCodeRef code = NULL;
+    if (SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &code)) {
+        return NO;
+    }
+
+    NSString *reqStr = [NSString stringWithFormat:@"anchor apple generic and certificate leaf[subject.OU] = \"%@\" and identifier \"%@\"", teamID, bundleID];
+
+    SecRequirementRef req = NULL;
+    OSStatus make = SecRequirementCreateWithString((__bridge CFStringRef)reqStr, kSecCSDefaultFlags, &req);
+    if (make != errSecSuccess) {
+        CFRelease(code);
+        return NO;
+    }
+
+    OSStatus ok = SecStaticCodeCheckValidity(code, kSecCSStrictValidate | kSecCSCheckAllArchitectures | kSecCSCheckNestedCode, req);
+
+    CFRelease(req);
+    CFRelease(code);
+
+    if (ok == errSecSuccess) {
+        return YES;
+    }
+
+    return NO;
+}
+
+BOOL isCommandPostInstalled(void)
+{
+    NSString *bundleID = @"com.latenitefilms.CommandPost";
+    NSString *teamID   = @"A5HDJTY9X5xx";
+
+    CFArrayRef urlsRef = LSCopyApplicationURLsForBundleIdentifier((__bridge CFStringRef)bundleID, NULL);
+    NSArray<NSURL *> *urls = CFBridgingRelease(urlsRef);
+
+    if (urls.count == 0) {
+        return NO;
+    }
+
+    for (NSURL *u in urls) if (isCommandPostCodeSigned(u, teamID, bundleID)) return YES;
+
+    return NO;
+}
+
 @implementation MJAppDelegate
 
 - (BOOL) applicationShouldHandleReopen:(NSApplication*)theApplication hasVisibleWindows:(BOOL)hasVisibleWindows {
@@ -145,6 +195,21 @@
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+
+    if (!isCommandPostInstalled()) {
+        [NSApp activateIgnoringOtherApps:YES];
+
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.alertStyle = NSAlertStyleInformational;
+        alert.messageText = @"CommandPost v2.0.0 and above is a paid update.";
+        alert.informativeText = @"After 9 years of free updates, to ensure that CommandPost continues to be developed, improved, and stay open-source, we've decided to charge a one-time fee for CommandPost moving forward.\n\nThank you to EVERYONE who has supported CommandPost throughout these years!\n\nPlease download and install CommandPost from the Mac App Store to continue.";
+
+        [alert addButtonWithTitle:@"OK"];
+
+        (void)[alert runModal];
+        [NSApp terminate:nil];
+        return;
+    }
 
     BOOL isTesting = NO;
 
@@ -315,7 +380,9 @@
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    MJLuaDestroy();
+    if (isCommandPostInstalled()){
+        MJLuaDestroy();
+    }
     return NSTerminateNow;
 }
 
