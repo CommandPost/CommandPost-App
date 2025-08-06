@@ -49,7 +49,7 @@ static BOOL isCommandPostCodeSigned(NSURL *url, NSString *teamID, NSString *bund
 BOOL isCommandPostInstalled(void)
 {
     NSString *bundleID = @"com.latenitefilms.CommandPost";
-    NSString *teamID   = @"A5HDJTY9X5xx";
+    NSString *teamID   = @"A5HDJTY9X5";
 
     CFArrayRef urlsRef = LSCopyApplicationURLsForBundleIdentifier((__bridge CFStringRef)bundleID, NULL);
     NSArray<NSURL *> *urls = CFBridgingRelease(urlsRef);
