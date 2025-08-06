@@ -6,7 +6,7 @@
 #import "SentryEnvelopeItemHeader.h"
 #import "SentryEnvelopeItemType.h"
 #import "SentryEvent.h"
-#import "SentryLog.h"
+#import "SentryLogC.h"
 #import "SentryMessage.h"
 #import "SentryMsgPackSerializer.h"
 #import "SentrySdkInfo.h"
@@ -14,7 +14,6 @@
 #import "SentrySession.h"
 #import "SentrySwift.h"
 #import "SentryTransaction.h"
-#import "SentryUserFeedback.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -112,6 +111,7 @@ NS_ASSUME_NONNULL_BEGIN
                   data:json];
 }
 
+#if !SDK_V9
 - (instancetype)initWithUserFeedback:(SentryUserFeedback *)userFeedback
 {
     NSError *error = nil;
@@ -129,6 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
                                           length:json.length]
                            data:json];
 }
+#endif // !SDK_V9
 
 - (instancetype)initWithClientReport:(SentryClientReport *)clientReport
 {
@@ -285,6 +286,7 @@ NS_ASSUME_NONNULL_BEGIN
                      singleItem:item];
 }
 
+#if !SDK_V9
 - (instancetype)initWithUserFeedback:(SentryUserFeedback *)userFeedback
 {
     SentryEnvelopeItem *item = [[SentryEnvelopeItem alloc] initWithUserFeedback:userFeedback];
@@ -292,6 +294,7 @@ NS_ASSUME_NONNULL_BEGIN
     return [self initWithHeader:[[SentryEnvelopeHeader alloc] initWithId:userFeedback.eventId]
                      singleItem:item];
 }
+#endif // !SDK_V9
 
 - (instancetype)initWithId:(SentryId *_Nullable)id singleItem:(SentryEnvelopeItem *)item
 {

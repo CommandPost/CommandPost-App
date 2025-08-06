@@ -9,11 +9,9 @@
 #import "SentryCrash.h"
 #import "SentryCrashWrapper.h"
 #import "SentryDependencyContainer.h"
-#import "SentryDispatchQueueWrapper.h"
 #import "SentryFileManager.h"
 #import "SentryHub+Private.h"
 #import "SentryInternalDefines.h"
-#import "SentryLog.h"
 #import "SentryLogC.h"
 #import "SentryMeta.h"
 #import "SentryNSProcessInfoWrapper.h"
@@ -26,6 +24,8 @@
 #import "SentrySerialization.h"
 #import "SentrySwift.h"
 #import "SentryTransactionContext.h"
+#import "SentryUIApplication.h"
+#import "SentryUseNSExceptionCallstackWrapper.h"
 #import "SentryUserFeedbackIntegration.h"
 
 #if TARGET_OS_OSX
@@ -218,7 +218,7 @@ static NSDate *_Nullable startTimestamp = nil;
         return;
     }
 
-    [SentryLogSwiftSupport configure:options.debug diagnosticLevel:options.diagnosticLevel];
+    [SentrySDKLogSupport configure:options.debug diagnosticLevel:options.diagnosticLevel];
 
     // We accept the tradeoff that the SDK might not be fully initialized directly after
     // initializing it on a background thread because scheduling the init synchronously on the main
@@ -241,7 +241,7 @@ static NSDate *_Nullable startTimestamp = nil;
     [newClient.fileManager moveAppStateToPreviousAppState];
     [newClient.fileManager moveBreadcrumbsToPreviousBreadcrumbs];
     [SentryDependencyContainer.sharedInstance
-            .scopeContextPersistentStore moveCurrentFileToPreviousFile];
+            .scopePersistentStore moveAllCurrentStateToPreviousState];
 
     SentryScope *scope
         = options.initialScope([[SentryScope alloc] initWithMaxBreadcrumbs:options.maxBreadcrumbs]);
@@ -394,6 +394,21 @@ static NSDate *_Nullable startTimestamp = nil;
     return [SentrySDK.currentHub captureException:exception withScope:scope];
 }
 
+#if TARGET_OS_OSX
+
++ (SentryId *)captureCrashOnException:(NSException *)exception
+{
+    SentryUseNSExceptionCallstackWrapper *wrappedException =
+        [[SentryUseNSExceptionCallstackWrapper alloc]
+                        initWithName:exception.name
+                              reason:exception.reason
+                            userInfo:exception.userInfo
+            callStackReturnAddresses:exception.callStackReturnAddresses];
+    return [SentrySDK captureException:wrappedException withScope:SentrySDK.currentHub.scope];
+}
+
+#endif // TARGET_OS_OSX
+
 + (SentryId *)captureMessage:(NSString *)message
 {
     return [SentrySDK captureMessage:message withScope:SentrySDK.currentHub.scope];
@@ -427,10 +442,12 @@ static NSDate *_Nullable startTimestamp = nil;
     [SentrySDK.currentHub storeEnvelope:envelope];
 }
 
+#if !SDK_V9
 + (void)captureUserFeedback:(SentryUserFeedback *)userFeedback
 {
     [SentrySDK.currentHub captureUserFeedback:userFeedback];
 }
+#endif // !SDK_V9
 
 + (void)captureFeedback:(SentryFeedback *)feedback
 {
@@ -697,6 +714,16 @@ static NSDate *_Nullable startTimestamp = nil;
     [SentryContinuousProfiler stop];
 }
 #endif // SENTRY_TARGET_PROFILING_SUPPORTED
+
+#if SENTRY_HAS_UIKIT
+
+/** Only needed for testing. We can't use `SENTRY_TEST || SENTRY_TEST_CI` because we call this from
+ * the iOS-Swift sample app. */
++ (nullable NSArray<NSString *> *)relevantViewControllersNames
+{
+    return SentryDependencyContainer.sharedInstance.application.relevantViewControllersNames;
+}
+#endif // SENTRY_HAS_UIKIT
 
 @end
 

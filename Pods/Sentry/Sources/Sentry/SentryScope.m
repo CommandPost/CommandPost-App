@@ -3,9 +3,8 @@
 #import "SentryBreadcrumb.h"
 #import "SentryEnvelopeItemType.h"
 #import "SentryEvent+Private.h"
-#import "SentryGlobalEventProcessor.h"
 #import "SentryLevelMapper.h"
-#import "SentryLog.h"
+#import "SentryLogC.h"
 #import "SentryPropagationContext.h"
 #import "SentryScope+Private.h"
 #import "SentryScopeObserver.h"
@@ -19,31 +18,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SentryScope ()
-
-/**
- * Set global tags -> these will be sent with every event
- */
-@property (atomic, strong) NSMutableDictionary<NSString *, NSString *> *tagDictionary;
-
-/**
- * Set global extra -> these will be sent with every event
- */
-@property (atomic, strong) NSMutableDictionary<NSString *, id> *extraDictionary;
-
-/**
- * This distribution of the application.
- */
-@property (atomic, copy) NSString *_Nullable distString;
-
-/**
- * Set the fingerprint of an event to determine the grouping
- */
-@property (atomic, strong) NSMutableArray<NSString *> *fingerprintArray;
-
-/**
- * SentryLevel of the event
- */
-@property (atomic) enum SentryLevel levelEnum;
 
 @property (atomic) NSUInteger maxBreadcrumbs;
 @property (atomic) NSUInteger currentBreadcrumbIndex;

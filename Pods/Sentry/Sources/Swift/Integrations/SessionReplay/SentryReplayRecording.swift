@@ -13,7 +13,7 @@ import Foundation
     let height: Int
     let width: Int
     
-    convenience init(segmentId: Int, video: SentryVideoInfo, extraEvents: [any SentryRRWebEventProtocol]) {
+    public convenience init(segmentId: Int, video: SentryVideoInfo, extraEvents: [any SentryRRWebEventProtocol]) {
         self.init(segmentId: segmentId, size: video.fileSize, start: video.start, duration: video.duration, frameCount: video.frameCount, frameRate: video.frameRate, height: video.height, width: video.width, extraEvents: extraEvents)
     }
     
@@ -27,11 +27,11 @@ import Foundation
         self.events = [meta, video] + (extraEvents ?? [])
     }
 
-    func headerForReplayRecording() -> [String: Any] {
+    public func headerForReplayRecording() -> [String: Any] {
         return ["segment_id": segmentId]
     }
 
-    func serialize() -> [[String: Any]] {
+    public func serialize() -> [[String: Any]] {
         return events.map { $0.serialize() }
     }
 }
