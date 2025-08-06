@@ -316,8 +316,9 @@ function op_notarize() {
         ${RM} "${HAMMERSPOON_BUNDLE_PATH}.zip"
 
         # At this stage we don't know if this is a full release build or a CI build, so prepare a notarized zip for both
-        create_zip "${HAMMERSPOON_BUNDLE_PATH}" "${HAMMERSPOON_BUNDLE_PATH}-$(release_version).zip"
-        create_zip "${HAMMERSPOON_BUNDLE_PATH}" "${HAMMERSPOON_BUNDLE_PATH}-$(nightly_version).zip"
+        #create_zip "${HAMMERSPOON_BUNDLE_PATH}" "${HAMMERSPOON_BUNDLE_PATH}-$(release_version).zip"
+        #create_zip "${HAMMERSPOON_BUNDLE_PATH}" "${HAMMERSPOON_BUNDLE_PATH}-$(nightly_version).zip"
+        create_zip "${HAMMERSPOON_BUNDLE_PATH}" "${BUILD_HOME}/CommandPostEngine.zip"
     fi
 
     echo " ✅ Notarization successful!"
@@ -466,11 +467,12 @@ function op_build_assert() {
     assert_xcbeautify
     assert_cocoapods_state
 
-    if [ "${XCODE_CONFIGURATION}" == "Release" ]; then
-        if [ ! -f "${SENTRY_TOKEN_API_FILE}" ]; then
-            fail "Release build requested, but no Sentry API token exists at: ${SENTRY_TOKEN_API_FILE}"
-        fi
-    fi
+    # Chris disabled for CommandPost Engine:
+    #if [ "${XCODE_CONFIGURATION}" == "Release" ]; then
+    #    if [ ! -f "${SENTRY_TOKEN_API_FILE}" ]; then
+    #        fail "Release build requested, but no Sentry API token exists at: ${SENTRY_TOKEN_API_FILE}"
+    #    fi
+    #fi
 }
 
 function op_test_assert() {
