@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9445CA0A19083251002568BB"
-               BuildableName = "CommandPost Engine.app"
+               BuildableName = "CommandPost.app"
                BlueprintName = "Hammerspoon"
                ReferencedContainer = "container:Hammerspoon.xcodeproj">
             </BuildableReference>
@@ -49,7 +49,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9445CA0A19083251002568BB"
-            BuildableName = "CommandPost Engine.app"
+            BuildableName = "CommandPost.app"
             BlueprintName = "Hammerspoon"
             ReferencedContainer = "container:Hammerspoon.xcodeproj">
          </BuildableReference>
@@ -120,7 +120,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9445CA0A19083251002568BB"
-            BuildableName = "CommandPost Engine.app"
+            BuildableName = "CommandPost.app"
             BlueprintName = "Hammerspoon"
             ReferencedContainer = "container:Hammerspoon.xcodeproj">
          </BuildableReference>
@@ -137,7 +137,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9445CA0A19083251002568BB"
-            BuildableName = "CommandPost Engine.app"
+            BuildableName = "CommandPost.app"
             BlueprintName = "Hammerspoon"
             ReferencedContainer = "container:Hammerspoon.xcodeproj">
          </BuildableReference>
