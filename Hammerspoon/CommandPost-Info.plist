@@ -138,8 +138,6 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
-	<key>CFBundleIconFile</key>
-	<string>CommandPost</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -219,7 +217,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Some CommandPost extensions require access to the camera.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright Chris Hocking &amp; David Peterson 2017-2025. Released under MIT license.</string>
+	<string>Copyright Chris Hocking &amp; David Peterson 2017-2026. Released under MIT license.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Some CommandPost extensions (such as hs.location) require access to your location.</string>
 	<key>NSMainNibFile</key>
@@ -227,7 +225,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Some CommandPost extensions (such as hs.noises) require access to the microphone.</string>
 	<key>NSAppDataUsageDescription</key>
-	<string>CommandPost needs to be able to read files contained in other applications containers. For example, CommandPost's reads the files within Keyboard Maestro's folder to get a list of macros, and within Final Cut Pro's folders to get a list of Share Destinations. You can click 'Allow' to approve permission for this session, or alternatively grant CommandPost 'Full Disk Access' in System Settings to avoid getting this request each time CommandPost restarts.</string>
+	<string>CommandPost needs to be able to read files contained in other applications containers. For example, CommandPost&apos;s reads the files within Keyboard Maestro&apos;s folder to get a list of macros, and within Final Cut Pro&apos;s folders to get a list of Share Destinations. You can click &apos;Allow&apos; to approve permission for this session, or alternatively grant CommandPost &apos;Full Disk Access&apos; in System Settings to avoid getting this request each time CommandPost restarts.</string>
 	<key>NSPrincipalClass</key>
 	<string>SentryCrashExceptionApplication</string>
 	<key>NSServices</key>
@@ -281,6 +279,10 @@
 	<string>S1wC2URSE4x0agiMwDwigH8UJ6ATH0I3Cf8z0V1Lthk=</string>
 	<key>SUScheduledCheckInterval</key>
 	<integer>900</integer>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
+	<key>CFBundleIconName</key>
+	<string>CommandPost</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
