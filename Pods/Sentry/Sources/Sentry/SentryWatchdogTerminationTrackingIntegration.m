@@ -1,19 +1,16 @@
 #import <SentryWatchdogTerminationTrackingIntegration.h>
 
 #if SENTRY_HAS_UIKIT
-
 #    import "SentryScope+Private.h"
 #    import <SentryANRTrackerV1.h>
-#    import <SentryAppState.h>
 #    import <SentryAppStateManager.h>
 #    import <SentryClient+Private.h>
-#    import <SentryCrashWrapper.h>
 #    import <SentryDependencyContainer.h>
 #    import <SentryHub.h>
-#    import <SentryNSProcessInfoWrapper.h>
 #    import <SentryOptions+Private.h>
 #    import <SentryPropagationContext.h>
 #    import <SentrySDK+Private.h>
+#    import <SentryScope+PrivateSwift.h>
 #    import <SentrySwift.h>
 #    import <SentryWatchdogTerminationBreadcrumbProcessor.h>
 #    import <SentryWatchdogTerminationLogic.h>
@@ -35,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init
 {
     if (self = [super init]) {
-        SentryNSProcessInfoWrapper *processInfoWrapper
+        id<SentryProcessInfoSource> processInfoWrapper
             = SentryDependencyContainer.sharedInstance.processInfoWrapper;
         self.testConfigurationFilePath
             = processInfoWrapper.environment[@"XCTestConfigurationFilePath"];
@@ -59,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
         [[SentryDispatchQueueWrapper alloc] initWithName:"io.sentry.watchdog-termination-tracker"
                                               attributes:attributes];
 
-    SentryFileManager *fileManager = [[[SentrySDK currentHub] getClient] fileManager];
+    SentryFileManager *fileManager = [[[SentrySDKInternal currentHub] getClient] fileManager];
     SentryAppStateManager *appStateManager =
         [SentryDependencyContainer sharedInstance].appStateManager;
     SentryCrashWrapper *crashWrapper = [SentryDependencyContainer sharedInstance].crashWrapper;
@@ -79,9 +76,15 @@ NS_ASSUME_NONNULL_BEGIN
 
     [self.tracker start];
 
+#    if SDK_V9
+    BOOL isV2Enabled = YES;
+#    else
+    BOOL isV2Enabled = options.enableAppHangTrackingV2;
+#    endif // SDK_V9
+
     self.anrTracker =
         [SentryDependencyContainer.sharedInstance getANRTracker:options.appHangTimeoutInterval
-                                                    isV2Enabled:options.enableAppHangTrackingV2];
+                                                    isV2Enabled:isV2Enabled];
     [self.anrTracker addListener:self];
 
     self.appStateManager = appStateManager;
@@ -90,7 +93,7 @@ NS_ASSUME_NONNULL_BEGIN
         [SentryDependencyContainer.sharedInstance
             getWatchdogTerminationScopeObserverWithOptions:options];
 
-    [SentrySDK.currentHub configureScope:^(SentryScope *_Nonnull outerScope) {
+    [SentrySDKInternal.currentHub configureScope:^(SentryScope *_Nonnull outerScope) {
         // Add the observer to the scope so that it can be notified when the scope changes.
         [outerScope addObserver:scopeObserver];
 

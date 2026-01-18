@@ -13,18 +13,19 @@ import UIKit
  * - note: The default method to show the feedback form is via a floating widget placed in the bottom trailing corner of the screen. See the configuration classes for alternative options.
  */
 @available(iOS 13.0, *)
+@available(iOSApplicationExtension, unavailable)
 @objcMembers
 @_spi(Private) public class SentryUserFeedbackIntegrationDriver: NSObject {
     let configuration: SentryUserFeedbackConfiguration
     private var widget: SentryUserFeedbackWidget?
     weak var delegate: (any SentryUserFeedbackIntegrationDriverDelegate)?
-    let screenshotProvider: SentryScreenshot
+    let screenshotSource: SentryScreenshotSource
     weak var customButton: UIButton?
 
-    @_spi(Private) public init(configuration: SentryUserFeedbackConfiguration, delegate: any SentryUserFeedbackIntegrationDriverDelegate, screenshotProvider: SentryScreenshot) {
+    @_spi(Private) public init(configuration: SentryUserFeedbackConfiguration, delegate: any SentryUserFeedbackIntegrationDriverDelegate, screenshotSource: SentryScreenshotSource) {
         self.configuration = configuration
         self.delegate = delegate
-        self.screenshotProvider = screenshotProvider
+        self.screenshotSource = screenshotSource
         super.init()
 
         if let uiFormConfigBuilder = configuration.configureForm {
@@ -85,6 +86,7 @@ import UIKit
 
 // MARK: SentryUserFeedbackFormDelegate
 @available(iOS 13.0, *)
+@available(iOSApplicationExtension, unavailable)
 extension SentryUserFeedbackIntegrationDriver: SentryUserFeedbackFormDelegate {
     func finished(with feedback: SentryFeedback?) {
         if let feedback = feedback {
@@ -100,6 +102,7 @@ extension SentryUserFeedbackIntegrationDriver: SentryUserFeedbackFormDelegate {
 
 // MARK: SentryUserFeedbackWidgetDelegate
 @available(iOS 13.0, *)
+@available(iOSApplicationExtension, unavailable)
 extension SentryUserFeedbackIntegrationDriver: SentryUserFeedbackWidgetDelegate {
     func showForm() {
         showForm(screenshot: nil)
@@ -108,6 +111,7 @@ extension SentryUserFeedbackIntegrationDriver: SentryUserFeedbackWidgetDelegate 
 
 // MARK: UIAdaptivePresentationControllerDelegate
 @available(iOS 13.0, *)
+@available(iOSApplicationExtension, unavailable)
 extension SentryUserFeedbackIntegrationDriver: UIAdaptivePresentationControllerDelegate {
     public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         widget?.rootVC.setWidget(visible: true, animated: configuration.animations)
@@ -118,6 +122,7 @@ extension SentryUserFeedbackIntegrationDriver: UIAdaptivePresentationControllerD
 
 // MARK: Private
 @available(iOS 13.0, *)
+@available(iOSApplicationExtension, unavailable)
 private extension SentryUserFeedbackIntegrationDriver {
     func showForm(screenshot: UIImage?) {
         let form = SentryUserFeedbackFormController(config: configuration, delegate: self, screenshot: screenshot)
@@ -156,7 +161,7 @@ private extension SentryUserFeedbackIntegrationDriver {
 
     @objc func userCapturedScreenshot() {
         stopObservingScreenshots()
-        showForm(screenshot: screenshotProvider.appScreenshots().first)
+        showForm(screenshot: screenshotSource.appScreenshots().first)
     }
 
     func stopObservingScreenshots() {

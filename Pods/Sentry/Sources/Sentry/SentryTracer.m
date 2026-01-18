@@ -12,7 +12,6 @@
 #import "SentryNoOpSpan.h"
 #import "SentryOptions+Private.h"
 #import "SentryProfilingConditionals.h"
-#import "SentryRandom.h"
 #import "SentrySDK+Private.h"
 #import "SentrySamplerDecision.h"
 #import "SentryScope+Private.h"
@@ -22,15 +21,12 @@
 #import "SentrySpanId.h"
 #import "SentrySpanOperation.h"
 #import "SentrySwift.h"
-#import "SentryThreadWrapper.h"
 #import "SentryTime.h"
 #import "SentryTraceContext.h"
 #import "SentryTracer+Private.h"
 #import "SentryTransaction.h"
 #import "SentryTransactionContext.h"
-#import "SentryUIApplication.h"
 #import <NSMutableDictionary+Sentry.h>
-#import <SentryMeasurementValue.h>
 
 #if SENTRY_TARGET_PROFILING_SUPPORTED
 #    import "SentryProfiledTracerConcurrency.h"
@@ -145,7 +141,7 @@ static BOOL appStartMeasurementRead;
 #if SENTRY_HAS_UIKIT
     [hub configureScope:^(SentryScope *scope) {
         if (scope.currentScreen != nil) {
-            self->viewNames = @[ scope.currentScreen ];
+            self->viewNames = @[ SENTRY_UNWRAP_NULLABLE(NSString, scope.currentScreen) ];
         }
     }];
 
@@ -437,8 +433,8 @@ static BOOL appStartMeasurementRead;
                 _traceContext = [[SentryTraceContext alloc] initWithTracer:self
                                                                      scope:_hub.scope
                                                                    options:_hub.client.options
-                        ?: SentrySDK.options]; // We should remove static classes and always
-                                               // inject dependencies.
+                        ?: SentrySDKInternal.options]; // We should remove static classes and always
+                                                       // inject dependencies.
             }
         }
     }
@@ -751,12 +747,14 @@ static BOOL appStartMeasurementRead;
 
     NSMutableArray *framesOfAllSpans = [NSMutableArray array];
     if ([(SentrySpan *)self frames]) {
-        [framesOfAllSpans addObjectsFromArray:[(SentrySpan *)self frames]];
+        [framesOfAllSpans addObjectsFromArray:SENTRY_UNWRAP_NULLABLE(NSArray<SentryFrame *>,
+                                                  [(SentrySpan *)self frames])];
     }
 
     for (SentrySpan *span in spans) {
         if (span.frames) {
-            [framesOfAllSpans addObjectsFromArray:span.frames];
+            [framesOfAllSpans
+                addObjectsFromArray:SENTRY_UNWRAP_NULLABLE(NSArray<SentryFrame *>, span.frames)];
         }
     }
 
@@ -812,7 +810,7 @@ static BOOL appStartMeasurementRead;
             return nil;
         }
 
-        measurement = [SentrySDK getAppStartMeasurement];
+        measurement = [SentrySDKInternal getAppStartMeasurement];
         if (measurement == nil) {
             SENTRY_LOG_DEBUG(@"No app start measurement available.");
             return nil;
@@ -917,14 +915,14 @@ static BOOL appStartMeasurementRead;
     }
 }
 
-+ (nullable SentryTracer *)getTracer:(id<SentrySpan>)span
++ (nullable SentryTracer *)getTracer:(id<SentrySpan> _Nullable)span
 {
     if (span == nil) {
         return nil;
     }
 
     if ([span isKindOfClass:[SentryTracer class]]) {
-        return span;
+        return (SentryTracer *)span;
     } else if ([span isKindOfClass:[SentrySpan class]]) {
         return [(SentrySpan *)span tracer];
     }

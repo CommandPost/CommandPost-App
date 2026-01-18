@@ -4,11 +4,9 @@
 
 #    import "SentryDependencyContainer.h"
 #    import "SentryDispatchFactory.h"
-#    import "SentryDispatchSourceWrapper.h"
 #    import "SentryEvent+Private.h"
 #    import "SentryFormatter.h"
 #    import "SentryLogC.h"
-#    import "SentryNSTimerFactory.h"
 #    import "SentrySwift.h"
 #    import "SentrySystemWrapper.h"
 #    import "SentryTime.h"
@@ -38,7 +36,7 @@ NSString *const kSentryMetricProfilerSerializationUnitNanoJoules = @"nanojoule";
 // sampling CPU usage and memory footprint, and we want to minimize the overhead of making the
 // necessary system calls to gather that information. This is currently roughly 10% of the
 // backtrace profiler's resolution.
-static uint64_t frequencyHz = 10;
+static NSInteger frequencyHz = 10;
 
 /**
  * @return a dictionary containing all the metric values recorded during the transaction, or @c nil
@@ -97,6 +95,35 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
     return @ { @"unit" : unit, @"values" : serializedValues };
 }
 
+NSDictionary<NSString *, id> *
+serializeContinuousProfileMetrics(NSDictionary *state)
+{
+    NSMutableDictionary<NSString *, id> *dict = [NSMutableDictionary<NSString *, id> dictionary];
+    NSArray<SentryMetricReading *> *memoryFootprint
+        = state[kSentryMetricProfilerSerializationKeyMemoryFootprint];
+    if (memoryFootprint.count > 0) {
+        dict[kSentryMetricProfilerSerializationKeyMemoryFootprint]
+            = serializeContinuousProfileMetricReadings(
+                memoryFootprint, kSentryMetricProfilerSerializationUnitBytes);
+    }
+    NSArray<SentryMetricReading *> *cpuEnergyUsage
+        = state[kSentryMetricProfilerSerializationKeyCPUEnergyUsage];
+    if (cpuEnergyUsage.count > 0) {
+        dict[kSentryMetricProfilerSerializationKeyCPUEnergyUsage]
+            = serializeContinuousProfileMetricReadings(
+                cpuEnergyUsage, kSentryMetricProfilerSerializationUnitNanoJoules);
+    }
+
+    NSArray<SentryMetricReading *> *cpuUsage = state[kSentryMetricProfilerSerializationKeyCPUUsage];
+    if (cpuUsage.count > 0) {
+        dict[kSentryMetricProfilerSerializationKeyCPUUsage]
+            = serializeContinuousProfileMetricReadings(
+                cpuUsage, kSentryMetricProfilerSerializationUnitPercentage);
+    }
+
+    return dict;
+}
+
 @implementation SentryMetricProfiler {
     SentryDispatchSourceWrapper *_dispatchSource;
 
@@ -135,7 +162,9 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
 {
     [self recordCPUsage];
     [self recordMemoryFootprint];
+#    if defined(__arm__) || defined(__arm64__)
     [self recordEnergyUsageEstimate];
+#    endif
 }
 
 - (void)stop
@@ -177,36 +206,15 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
     return dict;
 }
 
-- (NSMutableDictionary<NSString *, id> *)serializeContinuousProfileMetrics;
+- (NSDictionary<NSString *, NSArray<SentryMetricReading *> *> *)copyMetricProfilerData
 {
-    NSArray<SentryMetricReading *> *memoryFootprint;
-    NSArray<SentryMetricReading *> *cpuEnergyUsage;
-    NSArray<SentryMetricReading *> *cpuUsage;
+    NSMutableDictionary *copy = [NSMutableDictionary dictionary];
     @synchronized(self) {
-        cpuEnergyUsage = [NSArray<SentryMetricReading *> arrayWithArray:_cpuEnergyUsage];
-        memoryFootprint = [NSArray<SentryMetricReading *> arrayWithArray:_memoryFootprint];
-        cpuUsage = [NSArray<SentryMetricReading *> arrayWithArray:_cpuUsage];
+        copy[kSentryMetricProfilerSerializationKeyMemoryFootprint] = [_memoryFootprint copy];
+        copy[kSentryMetricProfilerSerializationKeyCPUUsage] = [_cpuUsage copy];
+        copy[kSentryMetricProfilerSerializationKeyCPUEnergyUsage] = [_cpuEnergyUsage copy];
     }
-
-    NSMutableDictionary<NSString *, id> *dict = [NSMutableDictionary<NSString *, id> dictionary];
-    if (memoryFootprint.count > 0) {
-        dict[kSentryMetricProfilerSerializationKeyMemoryFootprint]
-            = serializeContinuousProfileMetricReadings(
-                memoryFootprint, kSentryMetricProfilerSerializationUnitBytes);
-    }
-    if (cpuEnergyUsage.count > 0) {
-        dict[kSentryMetricProfilerSerializationKeyCPUEnergyUsage]
-            = serializeContinuousProfileMetricReadings(
-                cpuEnergyUsage, kSentryMetricProfilerSerializationUnitNanoJoules);
-    }
-
-    if (cpuUsage.count > 0) {
-        dict[kSentryMetricProfilerSerializationKeyCPUUsage]
-            = serializeContinuousProfileMetricReadings(
-                cpuUsage, kSentryMetricProfilerSerializationUnitPercentage);
-    }
-
-    return dict;
+    return copy;
 }
 
 - (void)clear
@@ -228,8 +236,8 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
 - (void)registerSampler
 {
     __weak typeof(self) weakSelf = self;
-    uint64_t intervalNs = (uint64_t)1e9 / frequencyHz;
-    uint64_t leewayNs = intervalNs / 2;
+    NSInteger intervalNs = (NSInteger)1e9 / frequencyHz;
+    NSInteger leewayNs = intervalNs / 2;
     _dispatchSource = [SentryDependencyContainer.sharedInstance.dispatchFactory
         sourceWithInterval:intervalNs
                     leeway:leewayNs
@@ -275,6 +283,8 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
     }
 }
 
+// Only some architectures support reading energy.
+#    if defined(__arm__) || defined(__arm64__)
 - (void)recordEnergyUsageEstimate
 {
     NSError *error;
@@ -297,6 +307,7 @@ SentrySerializedMetricEntry *_Nullable serializeContinuousProfileMetricReadings(
         [_cpuEnergyUsage addObject:[self metricReadingForValue:@(value)]];
     }
 }
+#    endif
 
 - (SentryMetricReading *)metricReadingForValue:(NSNumber *)value
 {

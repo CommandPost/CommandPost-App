@@ -457,6 +457,7 @@ EOF
     popd >/dev/null || fail "Unknown"
     popd >/dev/null || fail "Unknown"
 
+    echo "Release actions complete!"
 }
 
 ############################## COMMAND ASSERTIONS ##############################

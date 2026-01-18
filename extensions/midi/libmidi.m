@@ -995,7 +995,6 @@ static int midi_callback(lua_State *L) {
                             NSCAssert(NO, @"Unknown MIMIDICOmmandTYpe");
                             break;
                         }
-
                     };
                     [skin protectedCallAndError:@"hs.midi callback" nargs:5 nresults:0];
                 }

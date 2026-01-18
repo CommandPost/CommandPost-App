@@ -11,6 +11,7 @@
 @class SentryTracer;
 @class SentryTracerConfiguration;
 @class SentryReplayEvent;
+@class SentryAttachment;
 @class SentryReplayRecording;
 @protocol SentryIntegrationProtocol;
 
@@ -33,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Every integration starts with "Sentry" and ends with "Integration". To keep the payload of the
  * event small we remove both.
  */
-- (NSMutableArray<NSString *> *)trimmedInstalledIntegrationNames;
+- (NSArray<NSString *> *)trimmedInstalledIntegrationNames;
 
 - (void)addInstalledIntegration:(id<SentryIntegrationProtocol>)integration name:(NSString *)name;
 - (void)removeAllIntegrations;
@@ -63,6 +64,10 @@ NS_ASSUME_NONNULL_BEGIN
                   withScope:(SentryScope *)scope
     additionalEnvelopeItems:(NSArray<SentryEnvelopeItem *> *)additionalEnvelopeItems
     NS_SWIFT_NAME(capture(event:scope:additionalEnvelopeItems:));
+
+- (void)captureSerializedFeedback:(NSDictionary *)serializedFeedback
+                      withEventId:(NSString *)feedbackEventId
+                      attachments:(NSArray<SentryAttachment *> *)feedbackAttachments;
 
 - (void)captureTransaction:(SentryTransaction *)transaction withScope:(SentryScope *)scope;
 
