@@ -16,7 +16,7 @@ public class SentryCrashWrapper: NSObject {
     
     // Using lazy so we wait until SentryDependencyContainer is initialized
     @objc
-    public private(set) lazy var systemInfo = SentryDependencyContainerSwiftHelper.crashReporter().systemInfo as? [String: Any] ?? [:]
+    public private(set) lazy var systemInfo = SentryDependencyContainer.sharedInstance().crashReporter.systemInfo as? [String: Any] ?? [:]
     
     @objc
     public init(processInfoWrapper: SentryProcessInfoSource) {
@@ -44,7 +44,7 @@ public final class SentryCrashWrapper: NSObject {
     
     // Using lazy so we wait until SentryDependencyContainer is initialized
     @objc
-    public private(set) lazy var systemInfo = SentryDependencyContainerSwiftHelper.crashReporter().systemInfo as? [String: Any] ?? [:]
+    public private(set) lazy var systemInfo = SentryDependencyContainer.sharedInstance().crashReporter.systemInfo as? [String: Any] ?? [:]
     
     @objc
     public init(processInfoWrapper: SentryProcessInfoSource) {
@@ -69,7 +69,7 @@ public final class SentryCrashWrapper: NSObject {
     
     @objc
     public var crashedLastLaunch: Bool {
-        return SentryDependencyContainerSwiftHelper.crashReporter().crashedLastLaunch
+        return SentryDependencyContainer.sharedInstance().crashReporter.crashedLastLaunch
     }
     
     @objc
@@ -79,7 +79,7 @@ public final class SentryCrashWrapper: NSObject {
     
     @objc
     public var activeDurationSinceLastCrash: TimeInterval {
-        return SentryDependencyContainerSwiftHelper.crashReporter().activeDurationSinceLastCrash
+        return SentryDependencyContainer.sharedInstance().crashReporter.activeDurationSinceLastCrash
     }
     
     @objc
@@ -195,27 +195,25 @@ public final class SentryCrashWrapper: NSObject {
     
     private func enrichScopeWithRuntimeData(_ scope: Scope) {
         var runtimeContext: [String: Any] = [:]
-        
-        // We set this info on the runtime context because the app context has no existing fields
-        // suitable for representing Catalyst or iOS-on-Mac execution modes. We also wanted to avoid
-        // adding two new Apple-specific fields to the app context. Coming up with a generic,
-        // reusable property on the app context proved difficult, so instead we reuse the "name"
-        // field of the runtime context as a pragmatic and semantically acceptable solution.
-        // isiOSAppOnMac and isMacCatalystApp are mutually exclusive, so we only set one of them.
-        if #available(iOS 14.0, macOS 11.0, watchOS 7.0, tvOS 14.0, *) {
+
+        if #available(macOS 12, *) {
+            // We set this info on the runtime context because the app context has no existing fields
+            // suitable for representing Catalyst or iOS-on-Mac execution modes. We also wanted to avoid
+            // adding two new Apple-specific fields to the app context. Coming up with a generic,
+            // reusable property on the app context proved difficult, so instead we reuse the "name"
+            // field of the runtime context as a pragmatic and semantically acceptable solution.
+            // isiOSAppOnMac and isMacCatalystApp are mutually exclusive, so we only set one of them.
             if self.processInfoWrapper.isiOSAppOnMac {
                 runtimeContext["name"] = "iOS App on Mac"
                 runtimeContext["raw_description"] = "ios-app-on-mac"
             }
-        }
-        
-        if #available(iOS 13.0, macOS 10.15, watchOS 6.0, tvOS 13.0, *) {
+
             if self.processInfoWrapper.isMacCatalystApp {
                 runtimeContext["name"] = "Mac Catalyst App"
                 runtimeContext["raw_description"] = "raw_description"
             }
         }
-        
+
         if !runtimeContext.isEmpty {
             scope.setContext(value: runtimeContext, key: "runtime")
         }
@@ -267,10 +265,10 @@ public final class SentryCrashWrapper: NSObject {
     private func setScreenDimensions(_ deviceData: inout [String: Any]) {
         // The UIWindowScene is unavailable on visionOS
 #if (os(iOS) || os(tvOS)) && !SENTRY_NO_UIKIT
-        if let appWindows = SentryDependencyContainerSwiftHelper.windows(),
-           let appScreen = appWindows.first?.screen {
-            deviceData["screen_height_pixels"] = appScreen.bounds.size.height
-            deviceData["screen_width_pixels"] = appScreen.bounds.size.width
+        let screenSize = SentryDependencyContainerSwiftHelper.activeScreenSize()
+        if screenSize != CGSize.zero {
+            deviceData["screen_height_pixels"] = screenSize.height
+            deviceData["screen_width_pixels"] = screenSize.width
         }
 #endif // (os(iOS) || os(tvOS)) && !SENTRY_NO_UIKIT
     }

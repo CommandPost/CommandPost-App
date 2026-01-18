@@ -1,1 +1,1 @@
-../../../Sentry/Sources/Sentry/Public/SentryProfilingConditionals.h
+../../../Sentry/Sources/Sentry/include/SentryProfilingConditionals.h

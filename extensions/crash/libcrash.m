@@ -5,7 +5,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvariadic-macros"
 #define SDK_V9 0
-#define SDK_v9 0
+#define SWIFT_PACKAGE 0
 #import "Sentry.h"
 #pragma clang diagnostic pop
 

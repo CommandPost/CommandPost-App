@@ -1,19 +1,19 @@
 {
   "name": "Sentry",
-  "version": "8.57.3",
+  "version": "9.1.0",
   "summary": "Sentry client for cocoa",
   "homepage": "https://github.com/getsentry/sentry-cocoa",
   "license": "mit",
   "authors": "Sentry",
   "source": {
     "git": "https://github.com/getsentry/sentry-cocoa.git",
-    "tag": "8.57.3"
+    "tag": "9.1.0"
   },
   "platforms": {
-    "ios": "11.0",
-    "osx": "10.13",
-    "tvos": "11.0",
-    "watchos": "4.0",
+    "ios": "15.0",
+    "osx": "12",
+    "tvos": "15.0",
+    "watchos": "8.0",
     "visionos": "1.0"
   },
   "module_name": "Sentry",
@@ -44,8 +44,8 @@
         "Sources/SentryCrash/**/*.{h,hpp,m,mm,c,cpp}",
         "Sources/Swift/**/*.{swift,h,hpp,m,mm,c,cpp}"
       ],
-      "preserve_paths": "Sources/Sentry/include/module.modulemap",
       "public_header_files": "Sources/Sentry/Public/*.h",
+      "preserve_paths": "Sources/Sentry/include/module.modulemap",
       "resource_bundles": {
         "Sentry": "Sources/Resources/PrivacyInfo.xcprivacy"
       }
@@ -57,11 +57,11 @@
         "Sources/SentryCrash/**/*.{h,hpp,m,mm,c,cpp}",
         "Sources/Swift/**/*.{swift,h,hpp,m,mm,c,cpp}"
       ],
-      "preserve_paths": "Sources/Sentry/include/module.modulemap",
       "public_header_files": [
         "Sources/Sentry/Public/*.h",
         "Sources/Sentry/include/HybridPublic/*.h"
       ],
+      "preserve_paths": "Sources/Sentry/include/module.modulemap",
       "resource_bundles": {
         "Sentry": "Sources/Resources/PrivacyInfo.xcprivacy"
       }
