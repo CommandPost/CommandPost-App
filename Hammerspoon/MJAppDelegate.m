@@ -39,8 +39,10 @@
         @"com.latenitefilms.TransferToolbox"
     ];
 
-    NSString *expectedAuthority = @"Developer ID Application: LateNite Films Pty Ltd (A5HDJTY9X5)";
-    NSLog(@"[LateNite Validation] Expected authority: %@", expectedAuthority);
+    NSString *expectedTeamID = @"A5HDJTY9X5";
+    NSString *expectedAuthority = @"Apple Mac OS Application Signing";
+    NSLog(@"[LateNite Validation] Expected Team ID: %@", expectedTeamID);
+    NSLog(@"[LateNite Validation] Expected Authority: %@", expectedAuthority);
 
     for (NSString *bundleID in lateNiteBundleIDs) {
         NSLog(@"[LateNite Validation] Checking bundle ID: %@", bundleID);
@@ -86,52 +88,44 @@
 
                 NSLog(@"[LateNite Validation]   Successfully retrieved signing information");
 
-                // Log all keys in signingInfo for debugging
                 NSDictionary *signingDict = (__bridge NSDictionary *)signingInfo;
-                NSLog(@"[LateNite Validation]   Signing info keys: %@", signingDict.allKeys);
 
-                NSArray *certificateChain = signingDict[(__bridge NSString *)kSecCodeInfoCertificates];
+                // Check Team ID
+                NSString *teamID = signingDict[(__bridge NSString *)kSecCodeInfoTeamIdentifier];
+                NSLog(@"[LateNite Validation]   Team ID: %@", teamID ?: @"(nil)");
 
-                if (certificateChain == nil) {
-                    NSLog(@"[LateNite Validation]   ERROR: No certificate chain found (kSecCodeInfoCertificates is nil)");
+                BOOL teamIDMatches = [teamID isEqualToString:expectedTeamID];
+                NSLog(@"[LateNite Validation]   Team ID match: %@", teamIDMatches ? @"YES" : @"NO");
+
+                if (!teamIDMatches) {
                     CFRelease(signingInfo);
                     CFRelease(staticCode);
                     continue;
                 }
 
-                NSLog(@"[LateNite Validation]   Certificate chain count: %lu", (unsigned long)certificateChain.count);
+                // Check for Mac App Store signature (Apple Mac OS Application Signing)
+                NSArray *certificateChain = signingDict[(__bridge NSString *)kSecCodeInfoCertificates];
+                BOOL isAppStoreApp = NO;
 
-                if (certificateChain.count > 0) {
+                if (certificateChain && certificateChain.count > 0) {
                     SecCertificateRef certificate = (__bridge SecCertificateRef)certificateChain[0];
                     CFStringRef commonName = NULL;
                     OSStatus certStatus = SecCertificateCopyCommonName(certificate, &commonName);
 
-                    if (certStatus != errSecSuccess) {
-                        NSLog(@"[LateNite Validation]   ERROR: SecCertificateCopyCommonName failed with status: %d", (int)certStatus);
-                        CFRelease(signingInfo);
-                        CFRelease(staticCode);
-                        continue;
-                    }
-
-                    if (commonName != NULL) {
+                    if (certStatus == errSecSuccess && commonName != NULL) {
                         NSString *commonNameStr = (__bridge NSString *)commonName;
-                        NSLog(@"[LateNite Validation]   Certificate common name: %@", commonNameStr);
-                        NSLog(@"[LateNite Validation]   Expected authority: %@", expectedAuthority);
-                        NSLog(@"[LateNite Validation]   Match result: %@", [commonNameStr isEqualToString:expectedAuthority] ? @"YES" : @"NO");
-
-                        if ([commonNameStr isEqualToString:expectedAuthority]) {
-                            NSLog(@"[LateNite Validation] SUCCESS: Found valid LateNite app at %@", appURL.path);
-                            CFRelease(commonName);
-                            CFRelease(signingInfo);
-                            CFRelease(staticCode);
-                            return YES;
-                        }
+                        NSLog(@"[LateNite Validation]   Certificate Authority: %@", commonNameStr);
+                        isAppStoreApp = [commonNameStr isEqualToString:expectedAuthority];
+                        NSLog(@"[LateNite Validation]   Is App Store app: %@", isAppStoreApp ? @"YES" : @"NO");
                         CFRelease(commonName);
-                    } else {
-                        NSLog(@"[LateNite Validation]   ERROR: commonName is NULL");
                     }
-                } else {
-                    NSLog(@"[LateNite Validation]   ERROR: Certificate chain is empty");
+                }
+
+                if (teamIDMatches && isAppStoreApp) {
+                    NSLog(@"[LateNite Validation] SUCCESS: Found valid Mac App Store LateNite app at %@", appURL.path);
+                    CFRelease(signingInfo);
+                    CFRelease(staticCode);
+                    return YES;
                 }
 
                 CFRelease(signingInfo);
@@ -142,7 +136,7 @@
         }
     }
 
-    NSLog(@"[LateNite Validation] FAILED: No valid LateNite app found");
+    NSLog(@"[LateNite Validation] FAILED: No valid Mac App Store LateNite app found");
     return NO;
 }
 
