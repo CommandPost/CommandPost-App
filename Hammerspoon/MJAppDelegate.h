@@ -30,4 +30,5 @@
 @property (nonatomic, weak) id<HSOpenFileDelegate> openFileDelegate;
 @property (nonatomic, strong) NSString* updateAvailable;
 @property (nonatomic, strong) NSString* updateAvailableDisplayVersion;
+@property (nonatomic, assign) BOOL luaInitialized;
 @end

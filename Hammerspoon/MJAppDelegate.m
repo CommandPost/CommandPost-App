@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <Security/Security.h>
 #import "MJAppDelegate.h"
 #import "MJConsoleWindowController.h"
 #import "MJPreferencesWindowController.h"
@@ -18,6 +19,154 @@
 #endif
 
 @implementation MJAppDelegate
+
+#pragma mark - LateNite App Validation
+
++ (BOOL)isValidLateNiteAppInstalled {
+    NSLog(@"[LateNite Validation] Starting validation check...");
+
+    NSArray *lateNiteBundleIDs = @[
+        @"com.latenitefilms.ATEMExporter",
+        @"com.latenitefilms.BRAWToolbox",
+        @"com.latenitefilms.Capacitor",
+        @"com.latenitefilms.FastCollections",
+        @"com.latenitefilms.GyroflowToolbox",
+        @"com.latenitefilms.LUTRobot",
+        @"com.latenitefilms.MarkerToolbox",
+        @"com.latenitefilms.Metaburner",
+        @"com.latenitefilms.NewsImport",
+        @"com.latenitefilms.RecallToolbox",
+        @"com.latenitefilms.TransferToolbox"
+    ];
+
+    NSString *expectedAuthority = @"Developer ID Application: LateNite Films Pty Ltd (A5HDJTY9X5)";
+    NSLog(@"[LateNite Validation] Expected authority: %@", expectedAuthority);
+
+    for (NSString *bundleID in lateNiteBundleIDs) {
+        NSLog(@"[LateNite Validation] Checking bundle ID: %@", bundleID);
+
+        NSArray *appURLs = (__bridge_transfer NSArray *)LSCopyApplicationURLsForBundleIdentifier((__bridge CFStringRef)bundleID, NULL);
+
+        if (appURLs && appURLs.count > 0) {
+            NSLog(@"[LateNite Validation]   Found %lu app(s) for bundle ID", (unsigned long)appURLs.count);
+
+            for (NSURL *appURL in appURLs) {
+                NSLog(@"[LateNite Validation]   Checking app at path: %@", appURL.path);
+
+                // Check code signature
+                SecStaticCodeRef staticCode = NULL;
+                OSStatus status = SecStaticCodeCreateWithPath((__bridge CFURLRef)appURL, kSecCSDefaultFlags, &staticCode);
+
+                if (status != errSecSuccess) {
+                    NSLog(@"[LateNite Validation]   ERROR: SecStaticCodeCreateWithPath failed with status: %d", (int)status);
+                    continue;
+                }
+
+                if (staticCode == NULL) {
+                    NSLog(@"[LateNite Validation]   ERROR: staticCode is NULL");
+                    continue;
+                }
+
+                NSLog(@"[LateNite Validation]   Successfully created static code reference");
+
+                CFDictionaryRef signingInfo = NULL;
+                status = SecCodeCopySigningInformation(staticCode, kSecCSSigningInformation, &signingInfo);
+
+                if (status != errSecSuccess) {
+                    NSLog(@"[LateNite Validation]   ERROR: SecCodeCopySigningInformation failed with status: %d", (int)status);
+                    CFRelease(staticCode);
+                    continue;
+                }
+
+                if (signingInfo == NULL) {
+                    NSLog(@"[LateNite Validation]   ERROR: signingInfo is NULL");
+                    CFRelease(staticCode);
+                    continue;
+                }
+
+                NSLog(@"[LateNite Validation]   Successfully retrieved signing information");
+
+                // Log all keys in signingInfo for debugging
+                NSDictionary *signingDict = (__bridge NSDictionary *)signingInfo;
+                NSLog(@"[LateNite Validation]   Signing info keys: %@", signingDict.allKeys);
+
+                NSArray *certificateChain = signingDict[(__bridge NSString *)kSecCodeInfoCertificates];
+
+                if (certificateChain == nil) {
+                    NSLog(@"[LateNite Validation]   ERROR: No certificate chain found (kSecCodeInfoCertificates is nil)");
+                    CFRelease(signingInfo);
+                    CFRelease(staticCode);
+                    continue;
+                }
+
+                NSLog(@"[LateNite Validation]   Certificate chain count: %lu", (unsigned long)certificateChain.count);
+
+                if (certificateChain.count > 0) {
+                    SecCertificateRef certificate = (__bridge SecCertificateRef)certificateChain[0];
+                    CFStringRef commonName = NULL;
+                    OSStatus certStatus = SecCertificateCopyCommonName(certificate, &commonName);
+
+                    if (certStatus != errSecSuccess) {
+                        NSLog(@"[LateNite Validation]   ERROR: SecCertificateCopyCommonName failed with status: %d", (int)certStatus);
+                        CFRelease(signingInfo);
+                        CFRelease(staticCode);
+                        continue;
+                    }
+
+                    if (commonName != NULL) {
+                        NSString *commonNameStr = (__bridge NSString *)commonName;
+                        NSLog(@"[LateNite Validation]   Certificate common name: %@", commonNameStr);
+                        NSLog(@"[LateNite Validation]   Expected authority: %@", expectedAuthority);
+                        NSLog(@"[LateNite Validation]   Match result: %@", [commonNameStr isEqualToString:expectedAuthority] ? @"YES" : @"NO");
+
+                        if ([commonNameStr isEqualToString:expectedAuthority]) {
+                            NSLog(@"[LateNite Validation] SUCCESS: Found valid LateNite app at %@", appURL.path);
+                            CFRelease(commonName);
+                            CFRelease(signingInfo);
+                            CFRelease(staticCode);
+                            return YES;
+                        }
+                        CFRelease(commonName);
+                    } else {
+                        NSLog(@"[LateNite Validation]   ERROR: commonName is NULL");
+                    }
+                } else {
+                    NSLog(@"[LateNite Validation]   ERROR: Certificate chain is empty");
+                }
+
+                CFRelease(signingInfo);
+                CFRelease(staticCode);
+            }
+        } else {
+            NSLog(@"[LateNite Validation]   No apps found for this bundle ID");
+        }
+    }
+
+    NSLog(@"[LateNite Validation] FAILED: No valid LateNite app found");
+    return NO;
+}
+
++ (void)showNoValidAppAlert {
+    [NSApp activateIgnoringOtherApps:YES];
+
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.alertStyle = NSAlertStyleInformational;
+    alert.messageText = @"CommandPost v2 (and later) requires a paid LateNite App installed.";
+    alert.informativeText = @"After 9 years of free updates, to ensure that CommandPost continues to be developed, improved, and stay open-source, we've decided that you need at least ONE paid LateNite application installed to use CommandPost moving forward.\n\nThank you to EVERYONE who has supported CommandPost throughout these years!\n\nPlease download and install a LateNite App from the Mac App Store or roll back to a previous version of CommandPost v1.";
+
+    [alert addButtonWithTitle:@"Open Mac App Store"];
+    [alert addButtonWithTitle:@"Quit"];
+
+    NSModalResponse response = [alert runModal];
+
+    if (response == NSAlertFirstButtonReturn) {
+        [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://apps.apple.com/au/developer/latenite-films-pty-ltd/id1652018641"]];
+    }
+
+    [NSApp terminate:nil];
+}
+
+#pragma mark - Application Delegate Methods
 
 - (BOOL) applicationShouldHandleReopen:(NSApplication*)theApplication hasVisibleWindows:(BOOL)hasVisibleWindows {
     callDockIconCallback();
@@ -149,6 +298,12 @@
 
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+
+    // Check for valid LateNite app before proceeding
+    if (![MJAppDelegate isValidLateNiteAppInstalled]) {
+        [MJAppDelegate showNoValidAppAlert];
+        return; // This won't be reached as showNoValidAppAlert terminates the app
+    }
 
     BOOL isTesting = NO;
 
@@ -291,6 +446,7 @@
     MJDockIconSetup();
     [[MJConsoleWindowController singleton] setup];
     MJLuaCreate();
+    self.luaInitialized = YES;
 
     //if (!MJAccessibilityIsEnabled())
         //[[MJPreferencesWindowController singleton] showWindow: nil];
@@ -319,7 +475,9 @@
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {
-    MJLuaDestroy();
+    if (self.luaInitialized) {
+        MJLuaDestroy();
+    }
     return NSTerminateNow;
 }
 
