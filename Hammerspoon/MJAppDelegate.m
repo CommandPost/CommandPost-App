@@ -36,7 +36,17 @@
         @"com.latenitefilms.Metaburner",
         @"com.latenitefilms.NewsImport",
         @"com.latenitefilms.RecallToolbox",
-        @"com.latenitefilms.TransferToolbox"
+        @"com.latenitefilms.TransferToolbox",
+        @"com.latenitefilms.ScriptStar",
+        @"com.latenitefilms.TransferToolbox",
+        @"com.latenitefilms.NotionToolbox",
+        @"com.latenitefilms.SmartScriptPro",
+        @"com.latenitefilms.SyncScriptPro",
+        @"com.latenitefilms.TimecodeToolbox",
+        @"com.latenitefilms.VFXToolbox",
+        @"com.latenitefilms.KeyframeToolbox",
+        @"com.latenitefilms.OutputToolbox",
+        @"com.latenitefilms.SmartLevels"
     ];
 
     NSString *expectedTeamID = @"A5HDJTY9X5";
