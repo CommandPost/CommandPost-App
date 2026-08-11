@@ -654,5 +654,5 @@ function nightly_version() {
 function create_zip() {
     local SRC ; SRC="${1}"
     local DST ; DST="${2}"
-    /usr/bin/ditto -c -k --keepParent "${SRC}" "${DST}"
+    /usr/bin/ditto --norsrc -c -k --keepParent "${SRC}" "${DST}"
 }

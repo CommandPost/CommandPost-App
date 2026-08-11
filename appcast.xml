@@ -7,6 +7,21 @@
         <language>en</language>
 <!-- __UPDATE_MARKER__ -->
           <item>
+              <title>Version 1.1.1</title>
+              <sparkle:releaseNotesLink>
+                  https://www.hammerspoon.org/releasenotes/1.1.1.html
+              </sparkle:releaseNotesLink>
+              <pubDate>Thu, 26 Feb 2026 10:52:36 +0000</pubDate>
+              <enclosure url="https://github.com/Hammerspoon/hammerspoon/releases/download/1.1.1/Hammerspoon-1.1.1.zip"
+                  sparkle:version="6936"
+                  sparkle:shortVersionString="1.1.1"
+                  length="9704557"
+                  type="application/octet-stream"
+              />
+              <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+          </item>
+  
+          <item>
               <title>Version 1.1.0</title>
               <sparkle:releaseNotesLink>
                   https://www.hammerspoon.org/releasenotes/1.1.0.html
